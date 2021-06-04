@@ -126,7 +126,6 @@ def wandb_config(args):
     -------
     group_name : reference name for grouping instances of a model under different random seeds
     """
-
     group_name = f'{args.alg_name}_{args.model_class}_{args.activation}_{args.lr}'
 
     if args.alg_name == 'arks':

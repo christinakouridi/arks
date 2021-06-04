@@ -14,7 +14,7 @@ def pgd_linf(loss_func, model_attack, X, y, delta_attack=1.0, alpha=0.01, attack
     delta_attack : constraint for the amount of disturbances delta
     alpha : step size for gradient ascent on the disturbances delta
     attack_epoch : number of update steps for finding worst-case disturbances delta
-    randomize : whether to randomly initialize delta. If False, delta is initialized to a batch of zeros (default).
+    randomize : whether to randomly initialize delta. If False, delta is initialized to a batch of zeros (default)
 
     Returns
     -------
