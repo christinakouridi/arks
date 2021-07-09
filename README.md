@@ -6,8 +6,7 @@ It accompanies the paper "Adversarially Robust Kernel Smoothing".
 The implementation is in Python and PyTorch, with current support for the Fashion-MNIST, CIFAR-10, and CelebA datasets.
 Our code-base also includes implementations of baseline optimization methods: Empirical Risk Minimization (ERM) and the 
 Wasserstein Risk Method (WRM) [1], as well as adversarial attack methods: Projected Gradient Descent (PGD) [2] and 
-Fast-Gradient Sign Method (FGSM) [3]. The package was largely developed on a NVIDIA GeForce RTX 2070 SUPER GPU. We would 
-therefore recommend using gpu-enabled machines to fully replicate the experimental results in the accompanying paper.
+Fast-Gradient Sign Method (FGSM) [3].
 
 ## Installation
 
@@ -17,7 +16,7 @@ To install the package for development purposes, run the following steps:
 ```shell
 $ conda create --name arks python=3.6
 ```
-2. Install other dependencies outlined in `set-up.py`
+2. Install other dependencies outlined in `setup.py`
 ```shell
 $ pip install -e .
 ```
@@ -76,6 +75,20 @@ $ python src/main/train.py --alg-name arks --data cifar_10 --model-class resnet 
 To train and test ARKS on `CelebA`, run:
 ```shell
 $ python src/main/train.py --alg-name arks --data celeba --model-class cnn2 --lr 0.001 --lr-inner 0.002 --sigma 0.2 --activation lrelu --batch-size 128 --evaluate
+```
+
+## Citation
+If you make use of this code in your work, please cite our paper:
+
+```shell
+@misc{zhu2021adversarially,
+      title={Adversarially Robust Kernel Smoothing}, 
+      author={Jia-Jie Zhu and Christina Kouridi and Yassine Nemmour and Bernhard Schölkopf},
+      year={2021},
+      eprint={2102.08474},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG}
+}
 ```
 
 ## References
