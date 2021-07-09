@@ -1,7 +1,7 @@
 # Adversarial Robust Kernel Smoothing
 ## Overview
 This package can be used to run the Adversarially Robust Kernel Smoothing (ARKS) algorithm on deep learning tasks. 
-It accompanies the paper "Adversarially Robust Kernel Smoothing".  
+It accompanies the paper ["Adversarially Robust Kernel Smoothing"](https://arxiv.org/abs/2102.08474).  
 
 The implementation is in Python and PyTorch, with current support for the Fashion-MNIST, CIFAR-10, and CelebA datasets.
 Our code-base also includes implementations of baseline optimization methods: Empirical Risk Minimization (ERM) and the 
