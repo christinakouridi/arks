@@ -75,8 +75,10 @@ def model_save(model, args):
     model_name = f'model_{args.alg_name}'
     if args.alg_name == 'arks':
         model_name += f'_{args.sigma}'
-    if args.alg_name == 'wrm':
+    elif args.alg_name == 'wrm':
         model_name += f'_{args.gamma}'
+    elif args.alg_name == 'pgd':
+        model_name += f'_{args.delta}'
     model_name += f'_{args.seed}.pt'
 
     save_path = os.path.join(save_path, model_name)
@@ -103,8 +105,10 @@ def model_load(args, alg, device='cpu'):
     model_name = f'model_{alg}'
     if alg == 'arks':
         model_name += f'_{args.sigma}'
-    if alg == 'wrm':
+    elif alg == 'wrm':
         model_name += f'_{args.gamma}'
+    elif alg == 'pgd':
+        model_name += f'_{args.delta}'
     model_name += f'_{args.seed}.pt'
 
     model_path = os.path.join(load_path, model_name)
@@ -130,10 +134,10 @@ def wandb_config(args):
 
     if args.alg_name == 'arks':
         group_name += f'_{args.lr_inner}_{args.sigma}_{args.num_epoch_inner}'
-
     elif args.alg_name == 'wrm':
         group_name += f'_{args.lr_inner}_{args.gamma}_{args.num_epoch_inner}'
-
+    elif args.alg_name == 'pgd':
+        group_name += f'_{args.lr_inner}_{args.delta}_{args.num_epoch_inner}'
     if args.decay_lr:
         group_name += '_dlr'
     if args.decay_lr_inner:

@@ -102,7 +102,7 @@ if __name__ == '__main__':
             if i % args.log_interval == 0:
                 format_str = 'Epoch: {} | Train error: {: .3%} | Train loss: {: .6f} | Test error: {: .3%} | ' \
                              'Test loss: {: .6f} | Time: {: .2f} '
-                logging.info(format_str.format(*[i, train_loss, test_loss, train_err, test_err, time]))
+                logging.info(format_str.format(*[i, train_err, train_loss, test_err, test_loss, time]))
                 if args.wandb:
                     wandb.log({'train error': train_err, 'train loss': train_loss,
                                'test error': test_err, 'test loss': test_loss}, step=i)
@@ -136,9 +136,6 @@ if __name__ == '__main__':
                                'surrogate loss': surr_loss, 'test error': test_err, 'test loss': test_loss}, step=i)
 
         elif args.alg_name == 'wrm':
-            # indicated values used in WRM paper
-            # mnist (all digits): gamma = 0.04 * 9.21 = 0.3698 || synthetic: gamma = 2
-
             train_err, train_loss, train_adv_loss, surr_loss, rho, time = \
                     epoch_WRM(gamma=args.gamma,
                               lr_inner=args.lr_inner,
@@ -164,6 +161,31 @@ if __name__ == '__main__':
                 if args.wandb:
                     wandb.log({'train error': train_err, 'train loss': train_loss, 'adversarial loss': train_adv_loss,
                                'surrogate loss': surr_loss, 'test error': test_err, 'test loss': test_loss}, step=i)
+
+        elif args.alg_name == 'pgd':
+            train_err, train_loss, train_adv_loss, time = \
+                epoch_PGD(lr_inner=args.lr_inner,
+                          delta_attack=args.delta,
+                          num_epoch_inner=args.num_epoch_inner,
+                          loss_func=loss_func,
+                          loader=train_loader,
+                          model=model,
+                          model_swa=model_swa,
+                          opt=opt,
+                          device=device)
+            test_err, test_loss = test(loss_func=loss_func,
+                                       loader=test_loader,
+                                       model=model_swa if args.model_swa else model,
+                                       device=device)
+
+            # logging and wandb tracking
+            if i % args.log_interval == 0:
+                format_str = 'Epoch {} | Train error {: .3%} | Train loss {: .6f} | Adv loss {: .6f} | ' \
+                             'Test error {: .3%} | Test loss {: .6f} | | Time {: .3f}'
+                logging.info(format_str.format(*[i, train_err, train_loss, train_adv_loss, test_err, test_loss, time]))
+                if args.wandb:
+                    wandb.log({'train error': train_err, 'train loss': train_loss, 'test error': test_err,
+                               'test loss': test_loss}, step=i)
         else:
             raise NotImplementedError(f"invalid algorithm name: {args.alg_name}")
 

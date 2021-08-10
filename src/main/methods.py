@@ -246,6 +246,72 @@ def epoch_WRM(loss_func, loader, model=None, model_swa=None, gamma=1.0, opt=None
            np.average(surr_losses), np.average(costs), epoch_time
 
 
+def epoch_PGD(loss_func, loader, model=None, model_swa=None, opt=None, lr_inner=0.03, num_epoch_inner=15,
+              delta_attack=0.5, device='cpu'):
+    """
+    One training step of the Wasserstein Risk Method (WRM) introduced in the 'Certifying Some Distributional Robustness
+    with Principled Adversarial Training' paper by Sinha et al. This is our own implementation in PyTorch.
+
+    Parameters
+    ----------
+    loss_func : loss function
+    loader : data loader object with mini-batches (X, y)
+    model : model to be trained
+    model_swa : stochastic weight averaged model
+    opt : optimizer for model weights
+    lr_inner : step-size for delta updates
+    num_epoch_inner : number of update steps for finding worst-case disturbances delta
+    delta : maximum magnitude of the disturbances delta
+    device : gpu if available, otherwise cpu
+
+    Returns
+    -------
+    total_err / len(loader.sampler) : average train error
+    np.average(losses) : average train loss
+    np.average(adv_losses) : average adversarial loss corresponding to predictions on worst-case perturbations u^*
+    epoch_time : average time per epoch
+    """
+    epoch_start_time = time.perf_counter()
+    losses, adv_losses = [], []
+    total_err = 0.
+
+    for X, y in loader:
+        X, y = X.to(device), y.to(device)
+
+        model.train()
+
+        #  ============  INNER OPTIMIZATION: FIND WORST-CASE PERTURBATIONS Z ============== #
+        delta = pgd_linf(loss_func=loss_func,
+                         model_attack=model,
+                         X=X, y=y,
+                         delta_attack=delta_attack,
+                         alpha=lr_inner,
+                         attack_epoch=num_epoch_inner,
+                         randomize=False)
+
+        # perturb input images
+        Z = X.data.clone() + delta
+
+        #  ============  OUTER OPTIMIZATION: OPTIMIZE MODEL WEIGHTS ============== #
+        opt.zero_grad()
+        yp_adv = model(Z)
+        adv_loss = torch.mean(loss_func(yp_adv, y))
+        adv_loss.backward()
+        opt.step()
+
+        #  ============  EVALUATE ON UNPERTURBED TRAINING DATA X ============== #
+        loss, err = eval_train(model, X, y, loss_func, model_swa)
+
+        #  ============  LOG STATS ============== #
+        total_err += err  # error on unperturbed training data
+        losses.append(loss.item())
+        adv_losses.append(adv_loss.item())
+
+    epoch_end_time = time.perf_counter()
+    epoch_time = epoch_end_time - epoch_start_time
+    return total_err / len(loader.sampler), np.average(losses), np.average(adv_losses), epoch_time
+
+
 def eval_train(model, X, y, loss_func, model_swa=None):
     """
     Evaluates the model on a batch of unperturbed input samples X
