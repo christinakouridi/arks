@@ -456,6 +456,6 @@ def epochAttack(data, loader, loss_func, model, model_attack=None, delta_attack=
 
         # to speed up computation, evaluate on 20 first-batches only for CIFAR
         if data == 'cifar_10' and i == 19:
-            break
+            return total_err / (len(X) * 20), np.average(losses), fig
 
     return total_err / len(loader.sampler), np.average(losses), fig
